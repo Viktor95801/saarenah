@@ -216,4 +216,85 @@ void sa_garenaDestroy(sa_GArena *a) {
 }
 #endif
 
+// for measly Cpp users instead of gigachad C programmers
+#ifdef __cplusplus
+namespace sa {
+    class Arena {
+    public:
+        Arena(size_t size);
+        ~Arena();
+
+        void *alloc(size_t size);
+        void *calloc(size_t size, size_t count);
+        void *realloc(void *data, size_t size, size_t new_size);
+
+        void reset();
+    private:
+        sa_Arena m_arena; // internal C wrapper
+    };
+
+    class GArena {
+    public:
+        GArena(size_t size);
+        ~GArena();
+
+        void *alloc(size_t size);
+        void *calloc(size_t size, size_t count);
+        void *realloc(void *data, size_t size, size_t new_size);
+
+        void reset();
+    private:
+        sa_GArena *m_garena;
+    };
+}
+
+#ifdef SAARENAH_IMPLEMENTATION
+sa::Arena::Arena(size_t size) {
+    this->m_arena = (sa_Arena){
+        .mem = NULL,
+        .size = size,
+        .offset = 0,
+    };
+}
+sa::Arena::~Arena() {
+    sa_arenaDestroy(&this->m_arena);
+}
+
+void *sa::Arena::alloc(size_t size) {
+    return sa_arenaAlloc(&this->m_arena, size);
+}
+void *sa::Arena::calloc(size_t count, size_t size) {
+    return sa_arenaCAlloc(&this->m_arena, count, size);
+}
+void *sa::Arena::realloc(void *data, size_t size, size_t new_size) {
+    return sa_arenaReAlloc(&this->m_arena, data, size, new_size);
+}
+
+void sa::Arena::reset() {
+    sa_arenaReset(&this->m_arena);
+}
+
+sa::GArena::GArena(size_t size) {
+    this->m_garena = sa_garenaCreate(size);
+}
+sa::GArena::~GArena() {
+    sa_garenaDestroy(this->m_garena);
+}
+
+void *sa::GArena::alloc(size_t size) {
+    return sa_garenaAlloc(this->m_garena, size);
+}
+void *sa::GArena::calloc(size_t count, size_t size) {
+    return sa_garenaCAlloc(this->m_garena, count, size);
+}
+void *sa::GArena::realloc(void *data, size_t size, size_t new_size) {
+    return sa_garenaReAlloc(this->m_garena, data, size, new_size);
+}
+
+void sa::GArena::reset() {
+    sa_garenaReset(this->m_garena);
+}
+#endif
+#endif
+
 #endif // libSAARENAH_HeaderFile
