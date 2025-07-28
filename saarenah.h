@@ -115,6 +115,7 @@ void *sa_arenaReAlloc(sa_Arena *a, const void *data, size_t size, size_t new_siz
     if(result == NULL) 
         return NULL;
     memcpy(result, data, size);
+    return result;
 }
 
 void sa_arenaReset(sa_Arena *a) {
@@ -185,27 +186,28 @@ void *sa_garenaReAlloc(sa_GArena *a, const void *data, size_t size, size_t new_s
     if(result == NULL) 
         return NULL;
     memcpy(result, data, size);
+    return result;
 }
 
 void sa_garenaReset(sa_GArena *a) {
     if(a == NULL)
         return;
-    do {
+    while(a) {
         a->offset = 0;
         a = a->next;
-    } while(a->next != NULL);
+    }
 }
 void sa_garenaDestroy(sa_GArena *a) {
     if(a == NULL)
         return;
     sa_GArena *next;
-    do {
+    while(a) {
         a->offset = 0;
         a->size = 0;
         saFree(a->mem);
         next = a->next;
         saFree(a);
-    } while(next != NULL);
+    }
 }
 
 #endif // SAARENAH_IMPLEMENTATION
