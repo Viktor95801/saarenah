@@ -88,7 +88,7 @@ void *sa_arenaAlloc(sa_Arena *a, size_t size) {
     if(a->mem == NULL) {
         if(a->size != 0) {
             a->size = saMemAlign(a->size);
-            a->mem = saMalloc(saMax(a->size, size));
+            a->mem = (unsigned char*)saMalloc(saMax(a->size, size));
             if(a->mem == NULL) 
                 return NULL;
             a->offset = 0;
@@ -135,7 +135,7 @@ void sa_arenaDestroy(sa_Arena *a) {
 }
 
 sa_GArena *sa_garenaCreate(size_t size) {
-    sa_GArena *result = saMalloc(sizeof(sa_GArena));
+    sa_GArena *result = (sa_GArena*)saMalloc(sizeof(sa_GArena));
     if(result == NULL)
         return NULL;
     
@@ -143,7 +143,7 @@ sa_GArena *sa_garenaCreate(size_t size) {
     result->next = NULL;
     
     result->size = saMemAlign(size);
-    result->mem = saMalloc(saMemAlign(size));
+    result->mem = (unsigned char*)saMalloc(saMemAlign(size));
     if(result->mem == NULL) {
         saFree(result);
         return NULL;
@@ -207,6 +207,7 @@ void sa_garenaDestroy(sa_GArena *a) {
         saFree(a->mem);
         next = a->next;
         saFree(a);
+        a = next;
     }
 }
 
@@ -253,7 +254,7 @@ sa::Arena::Arena(size_t size) {
     this->m_arena = (sa_Arena){
         .mem = NULL,
         .size = size,
-        .offset = 0,
+        .offset = 0
     };
 }
 sa::Arena::~Arena() {
